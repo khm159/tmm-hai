@@ -1,0 +1,41 @@
+name: Mirror Branch to ISYE
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout CEC repository
+        uses: actions/checkout@v3
+
+      - name: Update CEC repository
+        run: |
+          git switch production
+          git fetch --force origin
+          git pull
+
+      - name: Add the ISYE repository as a mirror
+        run: |
+          git remote add mirror https://jkolb6:${{ secrets.ISYE_MIRROR_TOKEN }}@github.gatech.edu/isye-web/tmm_hai_cec
+          git fetch --force mirror
+
+      - name: Remove the .github folder to avoid a recursive workflow
+        run: rm -rf .github
+
+      - name: Commit the change
+        run: |
+          git config --global user.email ""
+          git config --global user.name "GitHub Actions"
+          git commit -a -m "[GitHub Action] Synced with CEC parent repo"
+
+      - name: Delete the production branch from ISYE
+        run: |
+          git push mirror --delete production --force || true
+
+      - name: Push to the ISYE main branch
+        run: git push mirror production --force
