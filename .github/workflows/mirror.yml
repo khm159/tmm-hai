@@ -33,9 +33,5 @@ jobs:
           git config --global user.name "GitHub Actions"
           git commit -a -m "[GitHub Action] Synced with CEC parent repo"
 
-      - name: Delete the production branch from ISYE
-        run: |
-          git push mirror --delete production --force || true
-
       - name: Push to the ISYE main branch
         run: git push mirror production:main --force
