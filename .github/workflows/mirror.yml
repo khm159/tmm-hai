@@ -38,4 +38,4 @@ jobs:
           git push mirror --delete production --force || true
 
       - name: Push to the ISYE main branch
-        run: git push mirror production --force
+        run: git push mirror production:main --force
