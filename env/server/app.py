@@ -76,8 +76,8 @@ socketio = SocketIO(app, cors_allowed_origins="*", logger=app.config['DEBUG'])
 
 # Attach handler for logging errors to file
 handler = logging.FileHandler(LOGFILE)
-handler.setLevel(logging.ERROR)  
-app.logger.addHandler(handler)  
+handler.setLevel(logging.ERROR)
+app.logger.addHandler(handler)
 
 #################################
 # Global Coordination Functions #
@@ -89,9 +89,9 @@ def timestamp():
 def try_create_game(game_name ,**kwargs):
     """
     Tries to create a brand new Game object based on parameters in `kwargs`
-    
+
     Returns (Game, Error) that represent a pointer to a game object, and error that occured
-    during creation, if any. In case of error, `Game` returned in None. In case of sucess, 
+    during creation, if any. In case of error, `Game` returned in None. In case of sucess,
     `Error` returned is None
 
     Possible Errors:
@@ -181,8 +181,8 @@ def get_waiting_game():
 
 def  _leave_game(user_id):
     """
-    Removes `user_id` from it's current game, if it exists. Rebroadcast updated game state to all 
-    other users in the relevant game. 
+    Removes `user_id` from it's current game, if it exists. Rebroadcast updated game state to all
+    other users in the relevant game.
 
     Leaving an active game force-ends the game for all other users, if they exist
 
@@ -195,7 +195,7 @@ def  _leave_game(user_id):
     if not game:
         # Cannot leave a game if not currently in one
         return False
-    
+
     # Acquire this game's lock to ensure all global state updates are atomic
     with game.lock:
         # Update socket state maintained by socketio
@@ -209,7 +209,7 @@ def  _leave_game(user_id):
             game.remove_player(user_id)
         else:
             game.remove_spectator(user_id)
-        
+
         # Whether the game was active before the user left
         was_active = game.id in ACTIVE_GAMES
 
@@ -229,7 +229,7 @@ def  _leave_game(user_id):
         elif was_active and not game.is_empty():
             # Active -> Waiting
             game.deactivate()
-            
+
     return was_active
 
 def _create_game(user_id, game_name, params={}, smm=None):
@@ -278,12 +278,12 @@ def _ensure_consistent_state():
 
     Let ACTIVE be the set of all active game IDs, GAMES be the set of all existing
     game IDs, and WAITING be the set of all waiting (non-stale) game IDs. Note that
-    a game could be in the WAITING_GAMES queue but no longer exist (indicated by 
+    a game could be in the WAITING_GAMES queue but no longer exist (indicated by
     the FREE_MAP)
 
     - Intersection of WAITING and ACTIVE games must be empty set
     - Union of WAITING and ACTIVE must be equal to GAMES
-    - id \in FREE_IDS => FREE_MAP[id] 
+    - id \in FREE_IDS => FREE_MAP[id]
     - id \in ACTIVE_GAMES => Game in active state
     - id \in WAITING_GAMES => Game in inactive state
     """
@@ -317,7 +317,7 @@ def get_agent_names():
 # Application routes #
 ######################
 
-# Hitting each of these endpoints creates a brand new socket that is closed 
+# Hitting each of these endpoints creates a brand new socket that is closed
 # at after the server response is received. Standard HTTP protocol
 
 @app.route('/')
@@ -389,9 +389,9 @@ def set_level():
     elif level == "round4":
         LAYOUT = "RSMM6"
         GAME_TIME = 93
-        
+
     print("Setting level to", level, LAYOUT)
-        
+
     return jsonify({"layout": LAYOUT})
 
 @app.route('/debug')
@@ -456,7 +456,7 @@ def on_create(data):
         print("Params", params)
         game_name = data.get('game_name', 'overcooked')
         _create_game(user_id, game_name, params, smm=smm)
-    
+
 @socketio.on('join')
 def on_join(data):
     user_id = request.sid
@@ -591,11 +591,11 @@ def play_game(game, smm=None, fps=10):
             # log the state
             with open("env/server/logs/" + USER_ID + ".txt", "a") as f:
                 f.write(str(state) + "\n")
-            
+
             # send the game state to the SMM engine, disabled because not running in real time
             # if smm is not None:
             #     smm.update({k : state[k] for k in state if k not in ["all_orders"]})
-            
+
             # convert position tuples to strings for nicer formatting, check 3 layers deep
             belief_state = copy.deepcopy(smm.belief_state if smm is not None else {})
             for item in belief_state:
@@ -611,7 +611,7 @@ def play_game(game, smm=None, fps=10):
                                     belief_state[item][prop][subprop] = str(belief_state[item][prop][subprop])
             socketio.emit('state_pong', { "state" : state, "smm" : belief_state }, room="jack")
         socketio.sleep(1/fps)
-    
+
     print("End game")
     thread_event.clear()
     with game.lock:
@@ -630,7 +630,7 @@ def run(_smm=None):
 
     # Dynamically parse host and port from environment variables (set by docker build)
     host = os.getenv('HOST', '0.0.0.0')
-    port = int(os.getenv('PORT', 5000))
+    port = int(os.getenv('PORT', 5001))
 
     # Attach exit handler to ensure graceful shutdown
     atexit.register(on_exit)
