@@ -45,14 +45,19 @@ function startGame(layout) {
 }
 
 function startInSituQuestionTimeout() {
+  timeout = userID == "123" ? 0 : 30;
   // set a timer for showing the questions
   questionTimeout = window.setTimeout(() => {
     pause(true);
     showInSituQuestions();
-  }, 1000 * 30);
+  }, 1000 * timeout);
 }
 
 function setInSituButtonLoading(timeout, after) {
+  // if the user id is 123, don't wait (dev user)
+  if (userID == "123") {
+    timeout = 0;
+  }
   framerate = 30;
   initTime = new Date().getTime();
   timeout *= 1000;
@@ -787,6 +792,10 @@ function hideInstructionsButtons() {
 }
 
 function setInstructionsButtonToContinue(prevStep, nextStep, loadingDuration) {
+  // if the user id is 123, don't wait (dev user)
+  if (userID == "123") {
+    loadingDuration = 0;
+  }
   document.getElementById("instructions-continue-text").innerHTML = "Continue";
   document
     .getElementById("instructions-continue")
@@ -807,6 +816,10 @@ function setInstructionsButtonToContinue(prevStep, nextStep, loadingDuration) {
 }
 
 function setInstructionsButtonLoading(timeout, after) {
+  // if the user id is 123, don't wait (dev user)
+  if (userID == "123") {
+    timeout = 0;
+  }
   framerate = 30;
   initTime = new Date().getTime();
   timeout *= 1000;
