@@ -22,7 +22,7 @@ If you use this code or a derivative of it, please cite the following paper:
 Kolb, Jack, and Karen M. Feigh. "Inferring Belief States in Partially-Observable Human-Robot Teams." 2024 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). IEEE, 2024.
 ```
 
-### Quick Summary
+### Summary
 
 This work is a first step towards how robots can construct a team mental model in a partially-observable human-robot team domain. We are broadly interested in answering the question *"Can a robot predict the belief state of a human teammate?"*. We present a 2D domain based on [Overcooked-AI](https://github.com/HumanCompatibleAI/overcooked_ai), and two baselines for constructing a model of the user's belief state. We relegate the scope of the mental model to Level 1 and Level 2 situation awareness, i.e., predicting the user's knowledge of objects in the scene and the context of what the user and robot teammate are doing. Through a user study we periodically asked participants sitation awareness questions to obtain ground truth data from which we evaluated the baselines.
 
