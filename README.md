@@ -88,13 +88,21 @@ There is likely still residual unused code from the base repository, however the
 
 To modify the environment:
 
-*How do I change a layout (map)?* `env/server/layouts/`.
+*How do I change a layout (map)?*
 
-*Where are the logs saved?* `env/server/logs/`.
+  `env/server/layouts/`.
 
-*How do I change the sprites?* `env/server/static/assets/`, the `.png` files can be edited directly, however changing the sprite bounding boxes requires editing the `.json` files.
+*Where are the logs saved?*
 
-*How do I change the UI elements?* `env/server/static/css/style.css` contains the CSS descriptors for most of the UI, `env/server/static/templates/index.html` is the base HTML page.
+  `env/server/logs/`.
+
+*How do I change the sprites?*
+
+  `env/server/static/assets/`, the `.png` files can be edited directly, however changing the sprite bounding boxes requires editing the `.json` files.
+
+*How do I change the UI elements?*
+
+  `env/server/static/css/style.css` contains the CSS descriptors for most of the UI, `env/server/static/templates/index.html` is the base HTML page.
 
 *How do I add or change the kitchen previews (image right before the user presses "Play")* Modify `env/server/static/images/preview_kitchen_roundX.png` where X is the layout number. This has to be done manually (screenshot, crop, save). Modifying a kitchen `.layout` file will not affect this image.
 
