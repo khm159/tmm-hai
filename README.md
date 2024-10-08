@@ -4,15 +4,15 @@ This repository contains project code, data, and analysis used for our paper *In
 
 ### Quick Summary
 
-This work is a first step at how robots can construct a team mental model in a partially-observable human-robot team domain. We are broadly interested in answering the question *"Can a robot predict the belief state of a human teammate?"*. We present a 2D domain based on [Overcooked-AI](https://github.com/HumanCompatibleAI/overcooked_ai), and two baselines for constructing a model of the user's belief state. We relegate the scope of the mental model to Level 1 and Level 2 situation awareness, i.e., predicting the user's knowledge of objects in the scene and the context of what the user and robot teammate are doing. Through a user study we had people participate in this domain, to whom we periodically asked sitation awareness questions to evaluate the baselines.
+This work is a first step towards how robots can construct a team mental model in a partially-observable human-robot team domain. We are broadly interested in answering the question *"Can a robot predict the belief state of a human teammate?"*. We present a 2D domain based on [Overcooked-AI](https://github.com/HumanCompatibleAI/overcooked_ai), and two baselines for constructing a model of the user's belief state. We relegate the scope of the mental model to Level 1 and Level 2 situation awareness, i.e., predicting the user's knowledge of objects in the scene and the context of what the user and robot teammate are doing. Through a user study we periodically asked participants sitation awareness questions to obtain ground truth data from which we evaluated the baselines.
 
 You may be interested in the following:
 
-1. The experiment domain, which is a lightweight variant of the Overcooked domain complete with a functional UI for a user study. (#Domain)[#Domain] has a comprehensive list of modifications from the base environment.
+1. The experiment domain, which is a lightweight variant of the Overcooked domain complete with a functional UI for a user study. See **Simulation Environment** for the key modifications from the base environment.
 
-2. A dataset of user gameplay runs. [#Dataset](#Dataset) contains the structure and features of this dataset.
+2. A dataset of user gameplay runs. See **User Study Data** for the structure and features of this dataset.
 
-3. The *logical predicates* and *LLM* mental model implementations. Refer to [#LLM Mental Model Baseline](#LLM Mental Model Baseline) and the paper for details on the models.
+3. The *logical predicates* and *LLM* mental model implementations. See **LLM Mental Model Baseline** and the paper for details on the models.
 
 ### Quick Start
 
