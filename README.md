@@ -200,7 +200,7 @@ For the paper, we used several scripts to analyze and visualize our data:
 
 * Utility scripts in `plots/` are used by `visualize_results.py` for generating the plots.
 
-# LLM Mental Model Baseline
+### LLM Mental Model Baseline
 
 We used GPT4 prompted on the current state and situation awareness posed to users. This meant the prior state history was **not** provided to the LLM, which is a low-hanging fruit for future work.
 
