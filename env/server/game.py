@@ -14,6 +14,7 @@ AGENT_DIR = None
 # Maximum allowable game time (in seconds)
 MAX_GAME_TIME = None
 
+# Default user visibility parameters
 VISIBILITY = "D"
 VISIBILITY_RANGE = 4
 
@@ -24,28 +25,7 @@ def _configure(max_game_time, agent_dir, visibility, visibility_range):
     VISIBILITY = visibility
     VISIBILITY_RANGE = visibility_range
 
-def fix_bc_path(path):
-    """
-    Loading a PPO agent trained with a BC agent requires loading the BC model as well when restoring the trainer, even though the BC model is not used in game
-    For now the solution is to include the saved BC model and fix the relative path to the model in the config.pkl file
-    """
-
-    import pickle
-    #the path is the agents/Rllib.*/agent directory
-    agent_path = os.path.dirname(path)
-    with open(os.path.join(agent_path,"config.pkl"), "rb") as f:
-        data = pickle.load(f)
-    bc_model_dir = data["bc_params"]["bc_config"]["model_dir"]
-    last_dir = os.path.basename(bc_model_dir)
-    bc_model_dir = os.path.join(agent_path,"bc_params",last_dir)
-    data["bc_params"]["bc_config"]["model_dir"]= bc_model_dir
-    with open(os.path.join(agent_path,"config.pkl"), "wb") as f:
-        pickle.dump(data,f)
-
-
-
 class Game(ABC):
-
     """
     Class representing a game object. Coordinates the simultaneous actions of arbitrary
     number of players. Override this base class in order to use.
@@ -160,6 +140,7 @@ class Game(ABC):
         self._is_active = False
 
     def reset(self):
+        print("Reset()")
         """
         Restarts the game while keeping all active players by resetting game stats and temporarily disabling `tick`
         """
@@ -310,73 +291,6 @@ class Game(ABC):
         """
         return {}
 
-
-
-class DummyGame(Game):
-
-    """
-    Standin class used to test basic server logic
-    """
-
-    def __init__(self, **kwargs):
-        super(DummyGame, self).__init__(**kwargs)
-        self.counter = 0
-
-    def is_full(self):
-        return self.num_players == 2
-
-    def apply_action(self, idx, action):
-        pass
-
-    def apply_actions(self):
-        self.counter += 1
-
-    def is_finished(self):
-        return self.counter >= 100
-
-    def get_state(self):
-        state = super(DummyGame, self).get_state()
-        state['count'] = self.counter
-        return state
-
-
-class DummyInteractiveGame(Game):
-
-    """
-    Standing class used to test interactive components of the server logic
-    """
-
-    def __init__(self, **kwargs):
-        super(DummyInteractiveGame, self).__init__(**kwargs)
-        self.max_players = int(kwargs.get('playerZero', 'human') == 'human') + int(kwargs.get('playerOne', 'human') == 'human')
-        self.max_count = kwargs.get('max_count', 30)
-        self.counter = 0
-        self.counts = [0] * self.max_players
-
-    def is_full(self):
-        return self.num_players == self.max_players
-
-    def is_finished(self):
-        return max(self.counts) >= self.max_count
-
-    def apply_action(self, player_idx, action):
-        if action.upper() == Direction.NORTH:
-            self.counts[player_idx] += 1
-        if action.upper() == Direction.SOUTH:
-            self.counts[player_idx] -= 1
-
-    def apply_actions(self):
-        super(DummyInteractiveGame, self).apply_actions()
-        self.counter += 1
-
-    def get_state(self):
-        state = super(DummyInteractiveGame, self).get_state()
-        state['count'] = self.counter
-        for i in range(self.num_players):
-            state['player_{}_count'.format(i)] = self.counts[i]
-        return state
-
-
 class OvercookedGame(Game):
     """
     Class for bridging the gap between Overcooked_Env and the Game interface
@@ -429,6 +343,7 @@ class OvercookedGame(Game):
         self.curr_tick = 0
         self.human_players = set()
         self.npc_players = set()
+        self.num_npc_players = self.max_players - 1  # Jack: replace this with a layout parameter or something
         self.visibility = VISIBILITY
         self.visibility_range = VISIBILITY_RANGE
         self.stage = 0
@@ -436,17 +351,12 @@ class OvercookedGame(Game):
         if randomized:
             random.shuffle(self.layouts)
 
-        if playerZero != 'human':
-            player_zero_id = playerZero + '_0'
-            self.add_player(player_zero_id, idx=0, buff_size=1, is_human=False)
-            self.npc_policies[player_zero_id] = self.get_policy(playerZero, idx=0)
-            self.npc_state_queues[player_zero_id] = LifoQueue()
-
-        if playerOne != 'human':
-            player_one_id = playerOne + '_1'
-            self.add_player(player_one_id, idx=1, buff_size=1, is_human=False)
-            self.npc_policies[player_one_id] = self.get_policy(playerOne, idx=1)
-            self.npc_state_queues[player_one_id] = LifoQueue()
+        for i in range(self.num_npc_players):
+            npc_id = "NPC_" + str(i)
+            self.add_player(npc_id, idx=i, buff_size=1, is_human=False)
+            self.npc_policies[npc_id] = FSMAI(self)
+            self.npc_policies[npc_id].agent_id = i
+            self.npc_state_queues[npc_id] = LifoQueue()
 
 
     def _curr_game_over(self):
@@ -460,6 +370,7 @@ class OvercookedGame(Game):
     def add_player(self, player_id, idx=None, buff_size=-1, is_human=True):
         super(OvercookedGame, self).add_player(player_id, idx=idx, buff_size=buff_size)
         if is_human:
+            print("ADDING HUMAN PLAYER!", player_id, idx, buff_size, is_human)
             self.human_players.add(player_id)
         else:
             self.npc_players.add(player_id)
@@ -483,7 +394,6 @@ class OvercookedGame(Game):
             state = queue.get()
             npc_action, _ = policy.action(state)
             super(OvercookedGame, self).enqueue_action(policy_id, npc_action)
-
 
     def is_full(self):
         return self.num_players >= self.max_players
@@ -557,6 +467,7 @@ class OvercookedGame(Game):
         super(OvercookedGame, self).activate()
 
         # Sanity check at start of each game
+        print("ACTIVATE", self.npc_players, self.human_players, self.players)
         if not self.npc_players.union(self.human_players) == set(self.players):
             raise ValueError("Inconsistent State")
 
@@ -619,8 +530,7 @@ class OvercookedGame(Game):
             visible.append([])
             for col in range(width):
                 visible[row].append([
-                    self.can_see(self.visibility, self.state.players[0].orientation, col - self.state.players[0].position[0], row - (self.state.players[0].position[1])),
-                    self.can_see(self.visibility, self.state.players[1].orientation, col - self.state.players[1].position[0], row - (self.state.players[1].position[1]))
+                    self.can_see(self.visibility, self.state.players[i].orientation, col - self.state.players[i].position[0], row - (self.state.players[i].position[1])) for i in range(self.num_players)
                 ])
         return visible
 
@@ -692,6 +602,7 @@ class FSMAI():
         self.fsm_state = self.fsm[self.fsm_state_recipe]  # the action the AI is doing next
         self.game = game
         self.state = None
+        self.agent_id = None
 
         # FSM params
         self.plan = []
@@ -710,10 +621,10 @@ class FSMAI():
         if loc[1] >= len(self.game.mdp.terrain_mtx) or loc[1] < 0:
             return False
         # open space
-        if self.game.mdp.terrain_mtx[loc[1]][loc[0]] != ' ':
+        if self.game.mdp.terrain_mtx[loc[1]][loc[0]] != ' ' and not self.game.mdp.terrain_mtx[loc[1]][loc[0]].isdigit():
             return False
         # player is there
-        if self.state.players[1].position == loc:
+        if [True for i in range(self.game.num_players) if self.state.players[i].position == loc and self.agent_id != i] != []:
             return False
         return True
 
@@ -825,8 +736,8 @@ class FSMAI():
 
     # determines the next action
     def action(self, state):
-        agent_position = state.player_positions[0]
-        agent_orientation = state.player_orientations[0]
+        agent_position = state.player_positions[self.agent_id]
+        agent_orientation = state.player_orientations[self.agent_id]
         self.state = state
 
         # plan with the FSM
@@ -841,7 +752,7 @@ class FSMAI():
                 self.path.pop()
 
             # check if player if blocking, if so, choose random direction
-            if self.path[-1] == self.state.players[1].position:
+            if [True for i in range(self.game.num_players) if i != self.agent_id and self.path[-1] == self.state.players[i].position] != []:
                 return self.pick_random_direction(state), None
 
             # move to the next position
@@ -866,7 +777,7 @@ class FSMAI():
         # 1) goes to nearest ingredient, 2) faces ingredient, 3) picks up ingredient
         if self.fsm_state == "get ingredient":
             # if holding an ingredient, move on
-            if state.players[0].held_object is not None:
+            if state.players[self.agent_id].held_object is not None:
                 self.move_to_next_recipe_state()
                 return self.pick_random_direction(state), None
 
@@ -898,13 +809,13 @@ class FSMAI():
             if facing != Action.STAY:
                 return facing, None
             # if the agent is not holding an ingredient, pick it up
-            elif state.players[0].held_object is None:
+            elif state.players[self.agent_id].held_object is None:
                 return Action.INTERACT, None
 
         # 1) goes to uncooked pot, 2) faces pot, 3) places ingredient in pot
         if self.fsm_state == "place in pot":
             # if not holding an ingredient, move on
-            if state.players[0].held_object is None:
+            if state.players[self.agent_id].held_object is None:
                 self.move_to_next_recipe_state()
                 return self.pick_random_direction(state), None
 
@@ -927,7 +838,7 @@ class FSMAI():
             if facing != Action.STAY:
                 return facing, None
             # if the agent is holding an ingredient, place it in the pot
-            elif state.players[0].held_object is not None:
+            elif state.players[self.agent_id].held_object is not None:
                 return Action.INTERACT, None
 
         # 1) checks if nearest pot is filled
@@ -948,7 +859,7 @@ class FSMAI():
         # 1) goes to nearest plate, 2) picks it up
         if self.fsm_state == "get plate":
             # if not holding a plate, move on
-            if state.players[0].held_object is not None and state.players[0].held_object.name == "dish":
+            if state.players[self.agent_id].held_object is not None and state.players[self.agent_id].held_object.name == "dish":
                 self.move_to_next_recipe_state()
                 return self.pick_random_direction(state), None
 
@@ -976,19 +887,19 @@ class FSMAI():
             if facing != Action.STAY:
                 return facing, None
             # if the agent is not holding an plate, pick it up
-            elif state.players[0].held_object is None:
+            elif state.players[self.agent_id].held_object is None:
                 return Action.INTERACT, None
 
         # 1) goes to nearest cooking or cooked pot, 2) fills the dish
         if self.fsm_state == "fill from cooked pot":
             # if not holding a plate, start over
-            if state.players[0].held_object is None:
+            if state.players[self.agent_id].held_object is None:
                 self.fsm_state_recipe = 0
                 self.fsm_state = self.fsm[self.fsm_state_recipe]
                 return self.pick_random_direction(state), None
 
             # if holding soup, move on
-            if state.players[0].held_object.name == "soup":
+            if state.players[self.agent_id].held_object.name == "soup":
                 self.move_to_next_recipe_state()
                 return self.pick_random_direction(state), None
 
@@ -1008,13 +919,13 @@ class FSMAI():
             if facing != Action.STAY:
                 return facing, None
             # if the agent is holding a dish, fill it
-            elif state.players[0].held_object is not None:
+            elif state.players[self.agent_id].held_object is not None:
                 return Action.INTERACT, None
 
         # 1) goes to nearest serving station, 2) serves dish
         if self.fsm_state == "serve dish":
             # if not holding a soup, start over
-            if state.players[0].held_object is None or state.players[0].held_object.name != "soup":
+            if state.players[self.agent_id].held_object is None or state.players[self.agent_id].held_object.name != "soup":
                 self.fsm_state_recipe = 0
                 self.fsm_state = self.fsm[self.fsm_state_recipe]
                 return Action.STAY, None
@@ -1032,7 +943,7 @@ class FSMAI():
             if facing != Action.STAY:
                 return facing, None
             # if the agent is holding a soup, serve it
-            elif state.players[0].held_object.name == "soup":
+            elif state.players[self.agent_id].held_object.name == "soup":
                 return Action.INTERACT, None
 
         print("Escaped from FSM!")
@@ -1053,34 +964,6 @@ class DummyAI():
     def reset(self):
         pass
 
-class DummyComputeAI(DummyAI):
-    """
-    Performs simulated compute before randomly sampling actions. Used for debugging
-    """
-    def __init__(self, compute_unit_iters=1e5):
-        """
-        compute_unit_iters (int): Number of for loop cycles in one "unit" of compute. Number of
-                                    units performed each time is randomly sampled
-        """
-        super(DummyComputeAI, self).__init__()
-        self.compute_unit_iters = int(compute_unit_iters)
-
-    def action(self, state):
-        # Randomly sample amount of time to busy wait
-        iters = random.randint(1, 10) * self.compute_unit_iters
-
-        # Actually compute something (can't sleep) to avoid scheduling optimizations
-        val = 0
-        for i in range(iters):
-            # Avoid branch prediction optimizations
-            if i % 2 == 0:
-                val += 1
-            else:
-                val += 2
-
-        # Return randomly sampled action
-        return super(DummyComputeAI, self).action(state)
-
 
 class StayAI():
     """
@@ -1091,99 +974,3 @@ class StayAI():
 
     def reset(self):
         pass
-
-
-class TutorialAI():
-
-    COOK_SOUP_LOOP = [
-        # Grab first onion
-        Direction.WEST,
-        Direction.WEST,
-        Direction.WEST,
-        Action.INTERACT,
-
-        # Place onion in pot
-        Direction.EAST,
-        Direction.NORTH,
-        Action.INTERACT,
-
-        # Grab second onion
-        Direction.WEST,
-        Action.INTERACT,
-
-        # Place onion in pot
-        Direction.EAST,
-        Direction.NORTH,
-        Action.INTERACT,
-
-        # Grab third onion
-        Direction.WEST,
-        Action.INTERACT,
-
-        # Place onion in pot
-        Direction.EAST,
-        Direction.NORTH,
-        Action.INTERACT,
-
-        # Cook soup
-        Action.INTERACT,
-
-        # Grab plate
-        Direction.EAST,
-        Direction.SOUTH,
-        Action.INTERACT,
-        Direction.WEST,
-        Direction.NORTH,
-
-        # Deliver soup
-        Action.INTERACT,
-        Direction.EAST,
-        Direction.EAST,
-        Direction.EAST,
-        Action.INTERACT,
-        Direction.WEST
-    ]
-
-    COOK_SOUP_COOP_LOOP = [
-        # Grab first onion
-        Direction.WEST,
-        Direction.WEST,
-        Direction.WEST,
-        Action.INTERACT,
-
-        # Place onion in pot
-        Direction.EAST,
-        Direction.SOUTH,
-        Action.INTERACT,
-
-        # Move to start so this loops
-        Direction.EAST,
-        Direction.EAST,
-
-        # Pause to make cooperation more real time
-        Action.STAY,
-        Action.STAY,
-        Action.STAY,
-        Action.STAY,
-        Action.STAY,
-        Action.STAY,
-        Action.STAY,
-        Action.STAY,
-        Action.STAY
-    ]
-
-    def __init__(self):
-        self.curr_phase = -1
-        self.curr_tick = -1
-
-    def action(self, state):
-        self.curr_tick += 1
-        if self.curr_phase == 0:
-            return self.COOK_SOUP_LOOP[self.curr_tick % len(self.COOK_SOUP_LOOP)], None
-        elif self.curr_phase == 2:
-            return self.COOK_SOUP_COOP_LOOP[self.curr_tick % len(self.COOK_SOUP_COOP_LOOP)], None
-        return Action.STAY, None
-
-    def reset(self):
-        self.curr_tick = -1
-        self.curr_phase += 1

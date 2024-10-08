@@ -48,22 +48,21 @@ if __name__ == "__main__":
         visibility = sys.argv[1]
 
     ### LLM vs LP Plot
-    # LLM_O4_mean, LLM_O4_variance, LLM_O9_mean, LLM_O9_variance, LP_O4_mean, LP_O4_variance, LP_O9_mean, LP_O9_variance = llm.process_llm_results()
-    # print(">>>", LLM_O4_mean, LLM_O4_variance, LLM_O9_mean, LLM_O9_variance, LP_O4_mean, LP_O4_variance, LP_O9_mean, LP_O9_variance)
-    # plots.bar.plot_bar_model_performance(LLM_O4_mean, LLM_O4_variance, LLM_O9_mean, LLM_O9_variance, LP_O4_mean, LP_O4_variance, LP_O9_mean, LP_O9_variance)
+    LLM_O4_mean, LLM_O4_variance, LLM_O9_mean, LLM_O9_variance, LP_O4_mean, LP_O4_variance, LP_O9_mean, LP_O9_variance = llm.process_llm_results()
+    plots.bar.plot_bar_model_performance(LLM_O4_mean, LLM_O4_variance, LLM_O9_mean, LLM_O9_variance, LP_O4_mean, LP_O4_variance, LP_O9_mean, LP_O9_variance)
 
     # load the data
     # dict_of_scores_by_user_and_round = {}
     # dict_of_responses = {}
     # for v in ["O9", "O6", "O5", "O4", "O3", "D9", "D6", "D5", "D4", "D3", "V6", "V5", "V4", "V3"]:
     #     _, _, responses_by_user_and_round, _, scores_by_user_and_round = load_data(visibility=v)
-    #     dict_of_scores_by_user_and_round[v] = scores_by_user_and_round   
-    #     dict_of_responses[v] = responses_by_user_and_round 
+    #     dict_of_scores_by_user_and_round[v] = scores_by_user_and_round
+    #     dict_of_responses[v] = responses_by_user_and_round
 
     responses_by_round, responses_by_user, responses_by_user_and_round, responses_by_question, scores_by_user_and_round = load_data(visibility=visibility)
 
     ### plot the line graph of user performance over each round
-    # plots.line.plot_line_matrix_scores_by_round(scores_by_user_and_round, category="user wrt full")
+    plots.line.plot_line_matrix_scores_by_round(scores_by_user_and_round, category="user wrt full")
 
     ### plot the line graph of the scores by the visibility type (X) and round (Y)
     # plots.line.plot_line_scores_by_visibility(dict_of_scores_by_user_and_round=dict_of_scores_by_user_and_round, dict_of_responses=dict_of_responses, category="human wrt user")
@@ -72,7 +71,7 @@ if __name__ == "__main__":
     plots.violin.plot_violin_scores_by_round(scores_by_user_and_round, category="agent wrt user", responses=responses_by_user_and_round, visibility=visibility)
 
     ### plot the question frequency histogram
-    # plots.histogram.plot_histogram_question_frequency(responses_by_question)
+    plots.histogram.plot_histogram_question_frequency(responses_by_question)
 
     ### plot the score distribution histogram
     # plots.histogram.plot_histogram_score_all_rounds(responses_by_user_and_round, category="user wrt full")  # one histogram for user average for all rounds

@@ -1,8 +1,8 @@
 {
     "grid":  """XXXXXXXXXXX
                 S  X   P  X
-                X         X
-                S  2X  1XXX
+                X    12   X
+                S   X   XXX
                 XXXXXXXXXXX""",
     "start_all_orders" : [
         { "ingredients" : ["tomato", "tomato", "tomato"]},

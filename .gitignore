@@ -4,7 +4,7 @@ package-lock.json
 node_modules/
 **/old/
 **/master_agents/
-**/.DS_Store/
-env/server/logs/
+**/.DS_Store
+env/server/logs/*
 processed_data/
 **/app.log

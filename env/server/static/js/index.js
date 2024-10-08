@@ -19,18 +19,11 @@ function startGame(layout) {
     document.getElementById("create").style.display = "none";
     document.getElementById("create").setAttribute("disabled", true);
   } else {
-    const formData = new FormData(
-      document.getElementById("environment-configure-form"),
-    );
-    let data = [];
-
-    formData.forEach((value, name) => {
-      data.push({ name, value });
-    });
-
-    params = arrToJSON(data);
+    params = {};
     params.layouts = [params.layout];
     params.layout = layout;
+    params.playerZero = "FSMAI";
+    params.playerOne = "human";
     paramsData = {
       params: params,
       game_name: "overcooked",
@@ -45,7 +38,7 @@ function startGame(layout) {
 }
 
 function startInSituQuestionTimeout() {
-  timeout = userID == "123" ? 0 : 30;
+  timeout = userID == devUser ? 30 : 30;
   // set a timer for showing the questions
   questionTimeout = window.setTimeout(() => {
     pause(true);
@@ -55,7 +48,7 @@ function startInSituQuestionTimeout() {
 
 function setInSituButtonLoading(timeout, after) {
   // if the user id is 123, don't wait (dev user)
-  if (userID == "123") {
+  if (userID == devUser) {
     timeout = 0;
   }
   framerate = 30;
@@ -399,7 +392,21 @@ function endStage() {
   studyStage = studyStages[studyStages.indexOf(studyStage) + 1];
 
   // set the cookie for the stage ending
-  setCookie("lastStage", studyStage, 30);
+  currentLastStage = getCookie("lastStage");
+  if (
+    currentLastStage &&
+    currentLastStage != "" &&
+    currentLastStage != "undefined"
+  ) {
+    // check if cleared the cookie manually
+    console.log(
+      "Current lastStage",
+      currentLastStage,
+      "new lastStage",
+      studyStage,
+    );
+    setCookie("lastStage", studyStage, 30);
+  }
 
   // introduce the next stage
   introduceStage();
@@ -408,6 +415,7 @@ function endStage() {
 // show instructions to introduce a stage
 function introduceStage() {
   log({ type: "introduce stage" });
+  console.log("introducing stage", studyStage);
   highlightStudyStage(studyStage);
 
   // if device is mobile or tablet, exit
@@ -418,8 +426,7 @@ function introduceStage() {
     setInstructionsButtonToContinue(
       undefined,
       () => {
-        window.location =
-          "https://app.prolific.com/submissions/complete?cc=CTUREFP5";
+        window.location = returnStudyURL;
       },
       1,
     );
@@ -522,8 +529,7 @@ function introduceStage() {
     setInstructionsButtonToContinue(
       undefined,
       () => {
-        window.location =
-          "https://app.prolific.com/submissions/complete?cc=C105IU9F";
+        window.location = completeStudyURL;
       },
       1,
     );
@@ -545,10 +551,10 @@ function recordScreening(obj) {
   resetButtons(obj);
   // record the screening value
   if (obj.id.startsWith("screening-location"))
-    screeningLocation = obj.innerHTML;
+    screeningLocation = obj.innerHTML.trim();
   else if (obj.id.startsWith("screening-age")) screeningAge = obj.innerHTML;
   else if (obj.id.startsWith("screening-vulnerable"))
-    screeningVulnerable = obj.innerHTML;
+    screeningVulnerable = obj.innerHTML.trim();
   // log the selection
   log({ type: "screening", selection: obj.id, value: obj.innerHTML });
 }
@@ -620,7 +626,7 @@ function showConsent() {
         )
       ) {
         log({ type: "consent", selection: "yes" });
-        showDemographicsIntro();
+        userID == devUser ? showInstructions3Text() : showScreeningInfo(); // skip the screening questions if the user is the dev user (123)
       } else {
         log({ type: "consent", selection: "alert" });
         alert(
@@ -793,7 +799,7 @@ function hideInstructionsButtons() {
 
 function setInstructionsButtonToContinue(prevStep, nextStep, loadingDuration) {
   // if the user id is 123, don't wait (dev user)
-  if (userID == "123") {
+  if (userID == devUser) {
     loadingDuration = 0;
   }
   document.getElementById("instructions-continue-text").innerHTML = "Continue";
@@ -817,7 +823,7 @@ function setInstructionsButtonToContinue(prevStep, nextStep, loadingDuration) {
 
 function setInstructionsButtonLoading(timeout, after) {
   // if the user id is 123, don't wait (dev user)
-  if (userID == "123") {
+  if (userID == devUser) {
     timeout = 0;
   }
   framerate = 30;
