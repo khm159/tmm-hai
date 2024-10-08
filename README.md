@@ -182,7 +182,7 @@ If you have any questions about the environment, please reach out to me via emai
 
 Log file data from 32 participants are included in `env/server/logs`. Each line of the log file is formatted as a Python dictionary, or JSON, for easy reading and parsing. Several scripts are available to parse the files into intermediary pickle files and compute the quantitative results presented in the paper.
 
-Note that the user data analysis scripts assume two agents and a 10x5 grid layout and would need modifications for more agents.
+Note that the user data analysis scripts assume two agents and a 10x5 grid layout and would need modifications for more agents or other gameboard sizes.
 
 While the team mental model computations are feasible ad-hoc, we handled them post-hoc so we could test a range of agent visibility.
 
