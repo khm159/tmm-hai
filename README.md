@@ -104,39 +104,77 @@ To modify the environment:
 
   `env/server/static/css/style.css` contains the CSS descriptors for most of the UI, `env/server/static/templates/index.html` is the base HTML page.
 
-*How do I add or change the kitchen previews (image right before the user presses "Play")* Modify `env/server/static/images/preview_kitchen_roundX.png` where X is the layout number. This has to be done manually (screenshot, crop, save). Modifying a kitchen `.layout` file will not affect this image.
+*How do I add or change the kitchen previews (image right before the user presses "Play")*
 
-*How do I change the instructions images?* You can modify the images in `env/server/static/images/`, or add new ones and edit `env/server/static/templates/index.html`.
+  Modify `env/server/static/images/preview_kitchen_roundX.png` where X is the layout number. This has to be done manually (screenshot, crop, save). Modifying a kitchen `.layout` file will not affect this image.
 
-*I am testing the environment, how do I reset the stage I am on?* Open your browser's developer console and run `ClearCookie()` to reset entirely, or `setStudyStage(s)` where s is in `intro, practice, round1, round2, round3, round4`.
+*How do I change the instructions images?*
 
-*Where do I change the URL that a user gets redirected to if they have an invalid device or do not give consent? Or when they complete the study?* `env/server/static/templates/index.html`, search for `study params`.
+  You can modify the images in `env/server/static/images/`, or add new ones and edit `env/server/static/templates/index.html`.
 
-*Where do I change what is written to introduce each round? Or the debrief script?* `env/server/static/js/index.js:introduceStage()`.
+*I am testing the environment, how do I reset the stage I am on?*
 
-*Where do I change the instructions? Or screening/demographics questionnaire?* `env/server/static/js/index.js:showIntroductionText(), showInstructions1Text(), showInstructions2Text(), etc` You will notice the questionnaire is a chain of functions, you can modify these at will. You can change the button responses in `env/static/templates/index.html`.
+  Open your browser's developer console and run `ClearCookie()` to reset entirely, or `setStudyStage(s)` where s is in `intro, practice, round1, round2, round3, round4`.
 
-*Where do I modify the situation awareness questions?* `env/server/static/js/insitu-questions.js:generateInSituQuestions()`.
+*Where do I change the URL that a user gets redirected to if they have an invalid device or do not give consent? Or when they complete the study?*
 
-*How do I turn off the situation awareness questions?* Set the `numSituationAwarenessQuestionsPerInterrupt` variable to `0` in `env/server/static/templates/index.html`.
+  `env/server/static/templates/index.html`, search for `study params`.
 
-*How do I change the consent form?* Replace `env/server/static/pdf/Consent Form.pdf` with your consent form.
+*Where do I change what is written to introduce each round? Or the debrief script?*
 
-*Where do I change the webpage title?* `env/server/static/templates/index.html`.
+  `env/server/static/js/index.js:introduceStage()`.
 
-*Where do I change the order of the kitchen layouts?* `env/server/static/templates/index.html:studyStages`.
+*Where do I change the instructions? Or screening/demographics questionnaire?*
 
-*How do I hide the visibility "dots" around the user's agent?* Set `env/server/static/templates/index.html:visibilityDots` to `false`.
+  `env/server/static/js/index.js:showIntroductionText(), showInstructions1Text(), showInstructions2Text(), etc` You will notice the questionnaire is a chain of functions, you can modify these at will. You can change the button responses in `env/static/templates/index.html`.
 
-*How do I make the environment fully-observable?* Set `env/server/config.json:visibility` to `"O"` and `env/server/config.json:visibility_range` to `99` (O99 is overkill and will cover pretty much any map you make).
+*Where do I modify the situation awareness questions?*
 
-*How do I add another layout?* Create the layout in `env/server/layouts/`, add the layout name to `env/server/static/templates/index.html:studyStages`, add the layout to `env/server/static/js/index.js:setStudyStage()` and `introduceStage()`, add the layout to `env/server/config.json`, add a new stage to `<experiment-progress-bar>` in `env/server/static/templates/index.html`, add a preview image to `env/server/static/images/` (copy/paste another layout preview and replace it once you've ran your new layout and can screenshot it).
+  `env/server/static/js/insitu-questions.js:generateInSituQuestions()`.
 
-*How do I add a visibility mode besides V, O, or D?* `env/server/game.py:can_see()`
+*How do I turn off the situation awareness questions?*
 
-*How do I edit the finite state machine AI?* `env/server/game.py:FSMAI`
+  Set the `numSituationAwarenessQuestionsPerInterrupt` variable to `0` in `env/server/static/templates/index.html`.
 
-*How do I change the number of AI agents?* In this work the layouts were designed for two agents, so introducing additional agents may require you to redesign the layouts. Additionally, the original Overcooked-AI domain was designed for two agents. Regardless, to increase the number of agents, change the `params["num_players"]` parameter in `env/server/app.py`, and add additional agent numbers in `env/server/layouts/*.layout`'s `grid` and start configurations in `start_state:players`. You will need to debug the graphics stack for why the third agent is showing as white instead of purple. If you do so, please reach out so I can integrate your code changes.
+*How do I change the consent form?*
+
+  Replace `env/server/static/pdf/Consent Form.pdf` with your consent form.
+
+*Where do I change the webpage title?*
+
+  `env/server/static/templates/index.html`.
+
+*Where do I change the order of the kitchen layouts?*
+
+  `env/server/static/templates/index.html:studyStages`.
+
+*How do I hide the visibility "dots" around the user's agent?*
+
+  Set `env/server/static/templates/index.html:visibilityDots` to `false`.
+
+*How do I make the environment fully-observable?*
+
+  Set `env/server/config.json:visibility` to `"O"` and `env/server/config.json:visibility_range` to `99` (O99 is overkill and will cover pretty much any map you make).
+
+*How do I add another layout?*
+
+  Create the layout in `env/server/layouts/`, add the layout name to `env/server/static/templates/index.html:studyStages`, add the layout to `env/server/static/js/index.js:setStudyStage()` and `introduceStage()`, add the layout to `env/server/config.json`, add a new stage to `<experiment-progress-bar>` in `env/server/static/templates/index.html`, add a preview image to `env/server/static/images/` (copy/paste another layout preview and replace it once you've ran your new layout and can screenshot it).
+
+*How do I add a visibility mode besides V, O, or D?*
+
+  `env/server/game.py:can_see()`
+
+*How do I change the number of AI agents?*
+
+  In this work the layouts were designed for two agents, so introducing additional agents may require you to redesign the layouts. Additionally, the original Overcooked-AI domain was designed for two agents. Regardless, to increase the number of agents, change the `params["num_players"]` parameter in `env/server/app.py`, and add additional agent numbers in `env/server/layouts/*.layout`'s `grid` and start configurations in `start_state:players`. You will need to debug the graphics stack for why the third agent is showing as white instead of purple. If you do so, please reach out so I can integrate your code changes.
+
+*How do I use a custom policy?*
+
+  Copy the dummy or FSMAI policy in `env/server/game.py`. To make agents use that policy, search `game.py` for `FSMAI(self)` and change to your new policy. This will make all agents use your new policy. You can add conditional logic to make some agents use a different policy, e.g., `self.npc_policies[npc_id] = FSMAI() if i < 2 else SomeOtherPolicy()`.
+
+*How do I edit the finite state machine AI?*
+
+  `env/server/game.py:FSMAI`
 
 If you have any questions about the environment, please reach out to me via email at kolb [at] gatech [dot] edu, or open a GitHub issue.
 
