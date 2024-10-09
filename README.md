@@ -160,6 +160,10 @@ To modify the environment:
 
   Create the layout in `env/server/layouts/`, add the layout name to `env/server/static/templates/index.html:studyStages`, add the layout to `env/server/static/js/index.js:setStudyStage()` and `introduceStage()`, add the layout to `env/server/config.json`, add a new stage to `<experiment-progress-bar>` in `env/server/static/templates/index.html`, add a preview image to `env/server/static/images/` (copy/paste another layout preview and replace it once you've ran your new layout and can screenshot it).
 
+*How do I make the layout larger?*
+
+  Add additional rows or columns in `env/server/layouts/(your layout).layout:grid`, and make sure there are no `objects` with positions on the floor. E.g., if you add a row to `RSMM1.layout`, change `{ "position" : (1, 4), "name": "tomato"},` to `{ "position" : (1, 5), "name": "tomato"},` so the tomato is no longer on the floor.
+
 *How do I add a visibility mode besides V, O, or D?*
 
   `env/server/game.py:can_see()`
