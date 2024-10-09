@@ -16,7 +16,13 @@ var DIRECTION_TO_NAME = {
 };
 
 var scene_config = {
-  player_colors: { 0: "blue", 1: "green" },
+  player_colors: {
+    0: "blue",
+    1: "green",
+    2: "orange",
+    3: "purple",
+    4: "red",
+  },
   tileSize: 80,
   animation_duration: ANIMATION_DURATION,
   show_post_cook_time: false,
