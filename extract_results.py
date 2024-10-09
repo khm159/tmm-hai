@@ -10,7 +10,7 @@ def main(visibility:str):
     structured_responses = {}  # responses for each user, for each round
     structured_scores = {}  # scores for each user, for each round
 
-    log_path = "./env/server/logs/"  # path of user data logs 
+    log_path = "./env/server/logs/"  # path of user data logs
 
     processed_user_data_path = "./processed_data/"  # path of processed data logs
     processed_users = [x.replace(".pkl", "") for x in os.listdir(processed_user_data_path)]  # all processed data file names, removing the .pkl extension
@@ -30,7 +30,7 @@ def main(visibility:str):
             structured_scores[user] = {}
 
         # for each round
-        for round in [1, 2, 3, 4]: 
+        for round in [1, 2, 3, 4]:
             if round not in round_responses:  # ensure round is in round responses
                 round_responses[round] = {}
             if round not in structured_responses[user]:  # ensure round is in the structured responses for the user
@@ -53,7 +53,11 @@ def main(visibility:str):
                     num_questions = user_data[7]
             else:  # otherwise, process the user logs
                 # this will create new SMMs, so data does not carry over between users and rounds
-                responses, user_score_wrt_true, agent_score_wrt_true, estimated_human_score_wrt_true, true_score_wrt_user, agent_score_wrt_user, estimated_human_score_wrt_user, num_questions = grader.grade_user(user=user, round=round, visibility=visibility, debug=False)
+                try:
+                    responses, user_score_wrt_true, agent_score_wrt_true, estimated_human_score_wrt_true, true_score_wrt_user, agent_score_wrt_user, estimated_human_score_wrt_user, num_questions = grader.grade_user(user=user, round=round, visibility=visibility, debug=False)
+                except:
+                    print("Failed to process user:", filename, "skipping")
+                    continue
                 with open(processed_user_data_path + filename + ".pkl", "wb") as f:  # save the user's data
                     pickle.dump([responses, user_score_wrt_true, agent_score_wrt_true, estimated_human_score_wrt_true, true_score_wrt_user, agent_score_wrt_user, estimated_human_score_wrt_user, num_questions], f)
 
@@ -65,7 +69,7 @@ def main(visibility:str):
             structured_scores[user][round]["agent wrt user"] = agent_score_wrt_user
             structured_scores[user][round]["estimated wrt user"] = estimated_human_score_wrt_user
             structured_scores[user][round]["num questions"] = num_questions
-            
+
             # for each question in the responses
             for question in responses:
                 if question not in question_responses:  # ensure question is in question responses
@@ -76,7 +80,7 @@ def main(visibility:str):
                     user_responses[user][question] = []
                 if question not in structured_responses[user][round]:  # ensure question is in structured responses for the user and round
                     structured_responses[user][round][question] = []
-                
+
                 # for each response to the question
                 for response in responses[question]:
                     question_responses[question].append(response)
@@ -95,7 +99,7 @@ def main(visibility:str):
         pickle.dump(structured_responses, f)
     with open(processed_user_data_path + visibility + "_smm_scores_by_user_and_round.pkl", "wb") as f:
         pickle.dump(structured_scores, f)
-    
+
     print("Processing complete! See the output .pkl files.")
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
     "grid":  """XPXXXXXXXXX
                 P         X
                 X         X
-                X    12   S
+                X    123  S
                 XXXXXXXXXSX""",
     "start_all_orders" : [
         { "ingredients" : ["tomato", "tomato", "tomato"]},
@@ -35,6 +35,7 @@
         ],
         "players": [
             { "position": [5, 3], "orientation": [0, 1], "held_object": None },
+            { "position": [6, 3], "orientation": [0, 1], "held_object": None },
             { "position": [7, 3], "orientation": [0, 1], "held_object": None },
         ]
     }

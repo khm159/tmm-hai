@@ -367,7 +367,7 @@ def on_create(data):
         params = data.get('params', {})
         #hardcoded since there is no input for toggling this flag
         #defnitely want to change this in the future
-        params["num_players"] = 2  # change this to set the number of players in the game
+        params["num_players"] = 3  # change this to set the number of players in the game
         params["mdp_params"] = {"old_dynamics":True}
         params["layout"] = LAYOUT + ".layout"
         params["layouts"] = [LAYOUT]
