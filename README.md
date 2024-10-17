@@ -211,5 +211,33 @@ We used GPT4 prompted on the current state and situation awareness posed to user
 The code used to generate the prompt is in `llm.py`. An example prompt follows:
 
 ```
+You are playing a simple 2D kitchen game. The objective of the game is for two agents, A0 and A1, to cook soups using ingredients from the counters. You are A1. The game board has 11 columns and 5 rows, where the location (0,0) is at the top left and the location (10,4) is at the bottom right. Here are the steps to cook a soup:
 
+1. Bring three ingredients to an unfilled pot. The ingredients can be tomatoes, or onions, or both.
+2. The pot will start cooking when it is filled.
+3. Once cooking is complete, bring a dish to the pot to plate the soup.
+4. Bring the plated soup to a serving station.
+5. The plated soup will then be delivered automatically.
+
+A pot is considered cooking if it has a soup at its location, and the soup is cooking. Cooking is complete if the soup at the pot's location is ready. A pot without a soup at its location is empty.
+
+The current objects in the kitchen are:
+    [object name] at ([x],[y]) [if soup: "containing: ingredient 1, ..., ingredient, Cooking: [true,false], Ready: [true,false]}
+
+The chefs in the kitchen are:
+    A0 at ([x],[y]) facing [up,down,left,right] and holding [nothing,ingredient/item name]
+    A1 at ([x],[y]) facing [up,down,left,right] and holding [nothing,ingredient/item name]
+
+Please answer the question as A1, using only one of responses below.
+
+The question is: [question text]
+
+You can answer with only one of:
+    - [possible response 1]
+    - [possible response 2]
+    - [...]
+
+What is your answer?
 ```
+
+Manual review was required to extract the answer from the LLM, as the LLM would sometimes respond with fluff around the answer (e.g., "I think A1 would respond with: [answer]")
