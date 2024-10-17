@@ -6,5 +6,6 @@ node_modules/
 **/master_agents/
 **/.DS_Store
 env/server/logs/*
+!env/server/logs/logs.zip
 processed_data/*
 **/app.log
