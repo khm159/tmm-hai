@@ -2,3 +2,5 @@ flask
 gym
 networkx
 pyperclip
+scipy
+flask_socketio
